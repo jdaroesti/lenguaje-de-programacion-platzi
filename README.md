@@ -27,3 +27,8 @@ the root directory.
 ```bash
 mypy . && nosetests
 ```
+
+# Run the interpreter
+```bash
+python3.8 main.py
+```
