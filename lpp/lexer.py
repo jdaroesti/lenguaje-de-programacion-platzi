@@ -102,8 +102,11 @@ class Lexer:
     def _read_identifier(self) -> str:
         initial_position = self._position
 
-        while self._is_letter(self._character):
+        is_first_letter = True
+        while self._is_letter(self._character) or \
+                (not is_first_letter and self._is_number(self._character)):
             self._read_character()
+            is_first_letter = False
 
         return self._source[initial_position:self._position]
 
