@@ -127,6 +127,25 @@ class LexerTest(TestCase):
         self.assertEquals(tokens, expected_tokens)
 
     def test_function_call(self) -> None:
-        self.fail('Not implemented yet')
         source: str = 'variable resultado = suma(dos, tres);'
+        lexer: Lexer = Lexer(source)
+
+        tokens: List[Token] = []
+        for i in range(10):
+            tokens.append(lexer.next_token())
+
+        expected_tokens: List[Token] = [
+            Token(TokenType.LET, 'variable'),
+            Token(TokenType.IDENT, 'resultado'),
+            Token(TokenType.ASSIGN, '='),
+            Token(TokenType.IDENT, 'suma'),
+            Token(TokenType.LPAREN, '('),
+            Token(TokenType.IDENT, 'dos'),
+            Token(TokenType.COMMA, ','),
+            Token(TokenType.IDENT, 'tres'),
+            Token(TokenType.RPAREN, ')'),
+            Token(TokenType.SEMICOLON, ';'),
+        ]
+
+        self.assertEquals(tokens, expected_tokens)
 
