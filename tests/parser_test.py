@@ -7,6 +7,7 @@ from typing import (
 from lpp.ast import (
     LetStatement,
     Program,
+    ReturnStatement,
 )
 from lpp.lexer import Lexer
 from lpp.parser import Parser
@@ -70,4 +71,19 @@ class ParserTest(TestCase):
         program: Program = parser.parse_program()
 
         self.assertEquals(len(parser.errors), 1)
+
+    def test_return_statements(self) -> None:
+        source: str = '''
+            regresa 5;
+            regresa foo;
+        '''
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self.assertEqual(len(program.statements), 2)
+        for statement in program.statements:
+            self.assertEqual(statement.token_literal(), 'regresa')
+            self.assertIsInstance(statement, ReturnStatement)
 
