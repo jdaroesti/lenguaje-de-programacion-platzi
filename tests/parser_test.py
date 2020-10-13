@@ -183,6 +183,31 @@ class ParserTest(TestCase):
                                         expected_operator,
                                         expected_right)
 
+    def test_operator_precedence(self) -> None:
+        test_sources: List[Tuple[str, str, int]] = [
+            ('-a * b;', '((-a) * b)', 1),
+            ('!-a;', '(!(-a))', 1),
+            ('a + b + c;', '((a + b) + c)', 1),
+            ('a + b - c;', '((a + b) - c)', 1),
+            ('a * b * c;', '((a * b) * c)', 1),
+            ('a * b / c;', '((a * b) / c)', 1),
+            ('a + b / c;', '(a + (b / c))', 1),
+            ('a + b * c + d / e - f;', '(((a + (b * c)) + (d / e)) - f)', 1),
+            ('3 + 4; -5 * 5;', '(3 + 4)((-5) * 5)', 2),
+            ('5 > 4 == 3 < 4;', '((5 > 4) == (3 < 4))', 1),
+            ('5 < 4 != 3 > 4;', '((5 < 4) != (3 > 4))', 1),
+            ('3 + 4 * 5 == 3 * 1 + 4 * 5;', '((3 + (4 * 5)) == ((3 * 1) + (4 * 5)))', 1),
+        ]
+
+        for source, expected_result, expected_statement_count in test_sources:
+            lexer: Lexer = Lexer(source)
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            self._test_program_statements(parser, program, expected_statement_count)
+            self.assertEquals(str(program), expected_result)
+
     def _test_infix_expression(self,
                                expression: Expression,
                                expected_left: Any,
