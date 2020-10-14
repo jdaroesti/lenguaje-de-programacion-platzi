@@ -208,6 +208,11 @@ class ParserTest(TestCase):
             ('falso;', 'falso', 1),
             ('3 > 5 == verdadero;', '((3 > 5) == verdadero)', 1),
             ('3 < 5 == falso;', '((3 < 5) == falso)', 1),
+            ('1 + (2 + 3) + 4;', '((1 + (2 + 3)) + 4)', 1),
+            ('(5 + 5) * 2;', '((5 + 5) * 2)', 1),
+            ('2 / (5 + 5);', '(2 / (5 + 5))', 1),
+            ('-(5 + 5);', '(-(5 + 5))', 1),
+            ('!(verdadero == verdadero);', '(!(verdadero == verdadero))', 1),
         ]
 
         for source, expected_result, expected_statement_count in test_sources:
