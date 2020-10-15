@@ -8,10 +8,12 @@ from typing import (
 )
 
 from lpp.ast import (
+    Block,
     Boolean,
     Expression,
     ExpressionStatement,
     Identifier,
+    If,
     Infix,
     Integer,
     LetStatement,
@@ -237,6 +239,70 @@ class ParserTest(TestCase):
             expression_statement = cast(ExpressionStatement, statement)
             assert expression_statement.expression is not None
             self._test_literal_expression(expression_statement.expression, expected_value)
+
+    def test_if_expression(self):
+        source: str = 'si (x < y) { z }'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        # Test correct node type
+        if_expression = cast(If, cast(ExpressionStatement, program.statements[0]).expression)
+        self.assertIsInstance(if_expression, If)
+
+        # Test condition
+        assert if_expression.condition is not None
+        self._test_infix_expression(if_expression.condition, 'x', '<', 'y')
+
+        # Test consequence
+        assert if_expression.consequence is not None
+        self.assertIsInstance(if_expression.consequence, Block)
+        self.assertEquals(len(if_expression.consequence.statements), 1)
+
+        consequence_statement = cast(ExpressionStatement, if_expression.consequence.statements[0])
+        assert consequence_statement.expression is not None
+        self._test_identifier(consequence_statement.expression, 'z')
+
+        # Test alternative
+        self.assertIsNone(if_expression.alternative)
+
+    def test_if_else_expression(self) -> None:
+        source: str = 'si (x != y) { x } si_no { y }'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        # Test correct node type
+        if_expression = cast(If, cast(ExpressionStatement, program.statements[0]).expression)
+        self.assertIsInstance(if_expression, If)
+
+        # Test condition
+        assert if_expression.condition is not None
+        self._test_infix_expression(if_expression.condition, 'x', '!=', 'y')
+
+        # Test consequence
+        assert if_expression.consequence is not None
+        self.assertIsInstance(if_expression.consequence, Block)
+        self.assertEquals(len(if_expression.consequence.statements), 1)
+
+        consequence_statement = cast(ExpressionStatement, if_expression.consequence.statements[0])
+        assert consequence_statement.expression is not None
+        self._test_identifier(consequence_statement.expression, 'x')
+
+        # Test alternative
+        assert if_expression.alternative is not None
+        self.assertIsInstance(if_expression.alternative, Block)
+        self.assertEquals(len(if_expression.alternative.statements), 1)
+
+        alternative_statement = cast(ExpressionStatement, if_expression.alternative.statements[0])
+        assert alternative_statement.expression is not None
+        self._test_identifier(alternative_statement.expression, 'y')
 
     def _test_boolean(self,
                       expression: Expression,
