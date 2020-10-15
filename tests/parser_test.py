@@ -12,6 +12,7 @@ from lpp.ast import (
     Boolean,
     Expression,
     ExpressionStatement,
+    Function,
     Identifier,
     If,
     Infix,
@@ -303,6 +304,52 @@ class ParserTest(TestCase):
         alternative_statement = cast(ExpressionStatement, if_expression.alternative.statements[0])
         assert alternative_statement.expression is not None
         self._test_identifier(alternative_statement.expression, 'y')
+
+    def test_function_literal(self) -> None:
+        source: str = 'procedimiento(x, y) { x + y }'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        # Test correct node type
+        function_literal = cast(Function, cast(ExpressionStatement, program.statements[0]).expression)
+        self.assertIsInstance(function_literal, Function)
+
+        # Test params
+        self.assertEquals(len(function_literal.parameters), 2)
+        self._test_literal_expression(function_literal.parameters[0], 'x')
+        self._test_literal_expression(function_literal.parameters[1], 'y')
+
+        # Test body
+        assert function_literal.body is not None
+        self.assertEquals(len(function_literal.body.statements), 1)
+
+        body = cast(ExpressionStatement, function_literal.body.statements[0])
+        assert body.expression is not None
+        self._test_infix_expression(body.expression, 'x', '+', 'y')
+
+    def test_function_parameters(self) -> None:
+        tests = [
+            {'input': 'procedimiento() {};', 'expected_params': []},
+            {'input': 'procedimiento(x) {};', 'expected_params': ['x']},
+            {'input': 'procedimiento(x, y, z) {};', 'expected_params': ['x', 'y', 'z']},
+        ]
+
+        for test in tests:
+            lexer: Lexer = Lexer(test['input']) # type: ignore
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            function = cast(Function, cast(ExpressionStatement, program.statements[0]).expression)
+
+            self.assertEquals(len(function.parameters), len(test['expected_params']))
+
+            for idx, param in enumerate(test['expected_params']):
+                self._test_literal_expression(function.parameters[idx], param)
 
     def _test_boolean(self,
                       expression: Expression,
