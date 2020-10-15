@@ -11,6 +11,7 @@ from lpp.ast import (
     Boolean,
     Expression,
     ExpressionStatement,
+    Function,
     Identifier,
     If,
     Infix,
@@ -177,6 +178,51 @@ class Parser:
 
         return expression_statement
 
+    def _parse_function(self) -> Optional[Function]:
+        assert self._current_token is not None
+        function = Function(token=self._current_token)
+
+        if not self._expected_token(TokenType.LPAREN):
+            return None
+
+        function.parameters = self._parse_function_parameters()
+
+        if not self._expected_token(TokenType.LBRACE):
+            return None
+
+        function.body = self._parse_block()
+
+        return function
+
+    def _parse_function_parameters(self) -> List[Identifier]:
+        params: List[Identifier] = []
+
+        assert self._peek_token is not None
+        if self._peek_token.token_type == TokenType.RPAREN:
+            self._advance_tokens()
+
+            return params
+
+        self._advance_tokens()
+
+        assert self._current_token is not None
+        identifier = Identifier(token=self._current_token,
+                                value=self._current_token.literal)
+        params.append(identifier)
+
+        while self._peek_token.token_type == TokenType.COMMA:
+            self._advance_tokens()
+            self._advance_tokens()
+
+            identifier = Identifier(token=self._current_token,
+                                    value=self._current_token.literal)
+            params.append(identifier)
+
+        if not self._expected_token(TokenType.RPAREN):
+            return []
+
+        return params
+
     def _parse_identifier(self) -> Identifier:
         assert self._current_token is not None
 
@@ -325,6 +371,7 @@ class Parser:
         return {
             TokenType.FALSE: self._parse_boolean,
             TokenType.IDENT: self._parse_identifier,
+            TokenType.FUNCTION: self._parse_function,
             TokenType.IF: self._parse_if,
             TokenType.INT: self._parse_integer,
             TokenType.LPAREN:self._parse_grouped_expression,
