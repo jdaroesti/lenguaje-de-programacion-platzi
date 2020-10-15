@@ -332,12 +332,24 @@ class ParserTest(TestCase):
         self._test_infix_expression(body.expression, 'x', '+', 'y')
 
     def test_function_parameters(self) -> None:
-        self.fail('Not implemented yet')
         tests = [
-            {'input': 'fn {};', 'expected_params': []},
-            {'input': 'fn {x};', 'expected_params': ['x']},
-            {'input': 'fn {x, y, z};', 'expected_params': ['x', 'y', 'z']},
+            {'input': 'procedimiento() {};', 'expected_params': []},
+            {'input': 'procedimiento(x) {};', 'expected_params': ['x']},
+            {'input': 'procedimiento(x, y, z) {};', 'expected_params': ['x', 'y', 'z']},
         ]
+
+        for test in tests:
+            lexer: Lexer = Lexer(test['input']) # type: ignore
+            parser: Parser = Parser(lexer)
+
+            program: Program = parser.parse_program()
+
+            function = cast(Function, cast(ExpressionStatement, program.statements[0]).expression)
+
+            self.assertEquals(len(function.parameters), len(test['expected_params']))
+
+            for idx, param in enumerate(test['expected_params']):
+                self._test_literal_expression(function.parameters[idx], param)
 
     def _test_boolean(self,
                       expression: Expression,
