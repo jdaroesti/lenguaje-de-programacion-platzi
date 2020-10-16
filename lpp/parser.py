@@ -9,6 +9,7 @@ from typing import (
 from lpp.ast import (
     Block,
     Boolean,
+    Call,
     Expression,
     ExpressionStatement,
     Function,
@@ -54,6 +55,7 @@ PRECEDENCES: Dict[TokenType, Precedence] = {
     TokenType.MINUS: Precedence.SUM,
     TokenType.DIVISION: Precedence.PRODUCT,
     TokenType.MULTIPLICATION: Precedence.PRODUCT,
+    TokenType.LPAREN: Precedence.CALL,
 }
 
 
@@ -138,6 +140,38 @@ class Parser:
 
         return Boolean(self._current_token,
                        self._current_token.token_type == TokenType.TRUE)
+
+    def _parse_call(self, function: Expression) -> Call:
+        assert self._current_token is not None
+        call = Call(self._current_token, function)
+        call.arguments = self._parse_call_arguments()
+
+        return call
+
+    def _parse_call_arguments(self) -> Optional[List[Expression]]:
+        arguments: List[Expression] = []
+
+        assert self._peek_token is not None
+        if self._peek_token.token_type == TokenType.RPAREN:
+            self._advance_tokens()
+
+            return arguments
+
+        self._advance_tokens()
+        if expression := self._parse_expression(Precedence.LOWEST):
+            arguments.append(expression)
+
+        while self._peek_token.token_type == TokenType.COMMA:
+            self._advance_tokens()
+            self._advance_tokens()
+
+            if expression := self._parse_expression(Precedence.LOWEST):
+                arguments.append(expression)
+
+        if not self._expected_token(TokenType.RPAREN):
+            return None
+
+        return arguments
 
     def _parse_expression(self, precedence: Precedence) -> Optional[Expression]:
         assert self._current_token is not None
@@ -365,6 +399,7 @@ class Parser:
             TokenType.NOT_EQ: self._parse_infix_expression,
             TokenType.LT: self._parse_infix_expression,
             TokenType.GT: self._parse_infix_expression,
+            TokenType.LPAREN: self._parse_call,
         }
 
     def _register_prefix_fns(self) -> PrefixParseFns:

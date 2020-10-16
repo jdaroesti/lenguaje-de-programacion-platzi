@@ -10,6 +10,7 @@ from typing import (
 from lpp.ast import (
     Block,
     Boolean,
+    Call,
     Expression,
     ExpressionStatement,
     Function,
@@ -350,6 +351,26 @@ class ParserTest(TestCase):
 
             for idx, param in enumerate(test['expected_params']):
                 self._test_literal_expression(function.parameters[idx], param)
+
+    def test_call_expression(self) -> None:
+        source: str = 'suma(1, 2 * 3, 4 + 5);'
+        lexer: Lexer = Lexer(source)
+        parser: Parser = Parser(lexer)
+
+        program: Program = parser.parse_program()
+
+        self._test_program_statements(parser, program)
+
+        call = cast(Call, cast(ExpressionStatement, program.statements[0]).expression)
+        self.assertIsInstance(call, Call)
+        self._test_identifier(call.function, 'suma')
+
+        # Test arguments
+        assert call.arguments is not None
+        self.assertEquals(len(call.arguments), 3)
+        self._test_literal_expression(call.arguments[0], 1)
+        self._test_infix_expression(call.arguments[1], 2, '*', 3)
+        self._test_infix_expression(call.arguments[2], 4, '+', 5)
 
     def _test_boolean(self,
                       expression: Expression,
