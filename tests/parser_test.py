@@ -44,17 +44,34 @@ class ParserTest(TestCase):
             variable x = 5;
             variable y = 10;
             variable foo = 20;
+            variable bar = verdadero;
         '''
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
 
         program: Program = parser.parse_program()
 
-        self.assertEqual(len(program.statements), 3)
+        self.assertEqual(len(program.statements), 4)
 
-        for statement in program.statements:
+        expected_identifiers_and_values: List[Tuple[str, Any]] = [
+            ('x', 5),
+            ('y', 10),
+            ('foo', 20),
+            ('bar', True),
+        ]
+
+        for statement, (expected_identifier, expected_value) in zip(
+                program.statements, expected_identifiers_and_values):
             self.assertEqual(statement.token_literal(), 'variable')
             self.assertIsInstance(statement, LetStatement)
+
+            let_statement = cast(LetStatement, statement)
+
+            assert let_statement.name is not None
+            self._test_identifier(let_statement.name, expected_identifier)
+
+            assert let_statement.value is not None
+            self._test_literal_expression(let_statement.value, expected_value)
 
     def test_names_in_let_statements(self) -> None:
         source: str = '''
@@ -90,16 +107,32 @@ class ParserTest(TestCase):
         source: str = '''
             regresa 5;
             regresa foo;
+            regresa verdadero;
+            regresa falso;
         '''
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
 
         program: Program = parser.parse_program()
 
-        self.assertEqual(len(program.statements), 2)
-        for statement in program.statements:
+        expected_return_values: List[Any] = [
+            5,
+            'foo',
+            True,
+            False,
+        ]
+
+        self.assertEqual(len(program.statements), 4)
+        for statement, expected_return_value in zip(
+                program.statements, expected_return_values):
             self.assertEqual(statement.token_literal(), 'regresa')
             self.assertIsInstance(statement, ReturnStatement)
+
+            return_statement = cast(ReturnStatement, statement)
+
+            assert return_statement.return_value is not None
+            self._test_literal_expression(return_statement.return_value, 
+                                          expected_return_value)
 
     def test_identifier_expression(self) -> None:
         source: str = 'foobar;'
