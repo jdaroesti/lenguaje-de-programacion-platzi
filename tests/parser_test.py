@@ -217,6 +217,10 @@ class ParserTest(TestCase):
             ('2 / (5 + 5);', '(2 / (5 + 5))', 1),
             ('-(5 + 5);', '(-(5 + 5))', 1),
             ('!(verdadero == verdadero);', '(!(verdadero == verdadero))', 1),
+            ('a + suma(b * c) + d;', '((a + suma((b * c))) + d)', 1),
+            ('suma(a, b, 1, 2 * 3, 4 + 5, suma(6, 7 * 8));',
+             'suma(a, b, 1, (2 * 3), (4 + 5), suma(6, (7 * 8)))', 1),
+            ('suma(a + b + c * d / f + g);', 'suma((((a + b) + ((c * d) / f)) + g))', 1),
         ]
 
         for source, expected_result, expected_statement_count in test_sources:
