@@ -107,16 +107,32 @@ class ParserTest(TestCase):
         source: str = '''
             regresa 5;
             regresa foo;
+            regresa verdadero;
+            regresa falso;
         '''
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
 
         program: Program = parser.parse_program()
 
-        self.assertEqual(len(program.statements), 2)
-        for statement in program.statements:
+        expected_return_values: List[Any] = [
+            5,
+            'foo',
+            True,
+            False,
+        ]
+
+        self.assertEqual(len(program.statements), 4)
+        for statement, expected_return_value in zip(
+                program.statements, expected_return_values):
             self.assertEqual(statement.token_literal(), 'regresa')
             self.assertIsInstance(statement, ReturnStatement)
+
+            return_statement = cast(ReturnStatement, statement)
+
+            assert return_statement.return_value is not None
+            self._test_literal_expression(return_statement.return_value, 
+                                          expected_return_value)
 
     def test_identifier_expression(self) -> None:
         source: str = 'foobar;'
