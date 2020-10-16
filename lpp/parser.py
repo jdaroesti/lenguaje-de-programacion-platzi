@@ -344,8 +344,11 @@ class Parser:
         if not self._expected_token(TokenType.ASSIGN):
             return None
 
-        # TODO: skip expression until we know how to create them
-        while self._current_token.token_type != TokenType.SEMICOLON:
+        self._advance_tokens()
+
+        let_statement.value = self._parse_expression(Precedence.LOWEST)
+
+        if not self._expected_token(TokenType.SEMICOLON):
             self._advance_tokens()
 
         return let_statement
