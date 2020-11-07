@@ -22,25 +22,25 @@ class Object(ABC):
 class Integer(Object):
 
     def __init__(self, value: int) -> None:
-        self._value = value
+        self.value = value
 
     def type(self) -> ObjectType:
         return ObjectType.INTEGER
 
     def inspect(self) -> str:
-        return str(self._value)
+        return str(self.value)
 
 
 class Boolean(Object):
 
     def __init__(self, value: bool) -> None:
-        self._value = value
+        self.value = value
 
     def type(self) -> ObjectType:
         return ObjectType.BOOLEAN
 
     def inspect(self) -> str:
-        return 'verdadero' if self._value else 'falso'
+        return 'verdadero' if self.value else 'falso'
 
 
 class Null(Object):
