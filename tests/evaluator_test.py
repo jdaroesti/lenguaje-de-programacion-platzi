@@ -34,6 +34,22 @@ class EvaluatorTest(TestCase):
         tests: List[Tuple[str, bool]] = [
             ('verdadero', True),
             ('falso', False),
+            ('1 < 2', True),
+            ('1 > 2', False),
+            ('1 < 1', False),
+            ('1 > 1', False),
+            ('1 == 1', True),
+            ('1 != 1', False),
+            ('1 == 2', False),
+            ('1 != 2', True),
+            ('verdadero == verdadero', True),
+            ('falso == falso', True),
+            ('verdadero == falso', False),
+            ('verdadero != falso', True),
+            ('(1 < 2) == verdadero', True),
+            ('(1 < 2) == falso', False),
+            ('(1 > 2) == verdadero', False),
+            ('(1 > 2) == falso', True),
         ]
 
         for source, expected in tests:
