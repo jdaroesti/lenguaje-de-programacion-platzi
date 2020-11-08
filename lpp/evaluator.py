@@ -12,6 +12,7 @@ from lpp.object import (
     Null,
     Object,
     ObjectType,
+    Return,
 )
 
 
@@ -26,7 +27,7 @@ def evaluate(node: ast.ASTNode) -> Optional[Object]:
     if node_type == ast.Program:
         node = cast(ast.Program, node)
 
-        return _eval_statements(node.statements)
+        return _evaluate_program(node)
     elif node_type == ast.ExpressionStatement:
         node = cast(ast.ExpressionStatement, node)
 
@@ -62,20 +63,32 @@ def evaluate(node: ast.ASTNode) -> Optional[Object]:
     elif node_type == ast.Block:
         node = cast(ast.Block, node)
 
-        return _eval_statements(node.statements)
+        return _evaluate_block_statement(node)
     elif node_type == ast.If:
         node = cast(ast.If, node)
 
         return _evaluate_if_expression(node)
+    elif node_type == ast.ReturnStatement:
+        node = cast(ast.ReturnStatement, node)
+
+        assert node.return_value is not None
+        value = evaluate(node.return_value)
+
+        assert value is not None
+        return Return(value)
 
     return None
 
 
-def _eval_statements(statements: List[ast.Statement]) -> Optional[Object]:
+def _evaluate_program(program: ast.Program) -> Optional[Object]:
     result: Optional[Object] = None
 
-    for statement in statements:
+    for statement in program.statements:
         result = evaluate(statement)
+
+        if type(result) == Return:
+            result = cast(Return, result)
+            return result.value
 
     return result
 
@@ -89,6 +102,18 @@ def _evaluate_bang_operator_expression(right: Object) -> Object:
         return TRUE
     else:
         return FALSE
+
+
+def _evaluate_block_statement(block: ast.Block) -> Optional[Object]:
+    result: Optional[Object] = None
+
+    for statement in block.statements:
+        result = evaluate(statement)
+
+        if result is not None and result.type() == ObjectType.RETURN:
+            return result
+
+    return result
 
 
 def _evaluate_if_expression(if_expression: ast.If) -> Optional[Object]:
