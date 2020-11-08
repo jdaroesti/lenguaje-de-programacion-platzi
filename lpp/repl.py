@@ -3,6 +3,7 @@ from typing import List
 from lpp.ast import Program
 from lpp.evaluator import evaluate
 from lpp.lexer import Lexer
+from lpp.object import Environment
 from lpp.parser import Parser
 from lpp.token import (
     Token,
@@ -22,14 +23,14 @@ def start_repl() -> None:
     while (source := input('>> ')) != 'salir()':
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
-
         program: Program = parser.parse_program()
+        env: Environment = Environment()
 
         if len(parser.errors) > 0:
             _print_parse_errors(parser.errors)
             continue
 
-        evaluated = evaluate(program)
+        evaluated = evaluate(program, env)
 
         if evaluated is not None:
             print(evaluated.inspect())
