@@ -59,6 +59,14 @@ def evaluate(node: ast.ASTNode) -> Optional[Object]:
 
         assert right is not None and left is not None
         return _evaluate_infix_expression(node.operator, left, right)
+    elif node_type == ast.Block:
+        node = cast(ast.Block, node)
+
+        return _eval_statements(node.statements)
+    elif node_type == ast.If:
+        node = cast(ast.If, node)
+
+        return _evaluate_if_expression(node)
 
     return None
 
@@ -81,6 +89,20 @@ def _evaluate_bang_operator_expression(right: Object) -> Object:
         return TRUE
     else:
         return FALSE
+
+
+def _evaluate_if_expression(if_expression: ast.If) -> Optional[Object]:
+    assert if_expression.condition is not None
+    condition = evaluate(if_expression.condition)
+
+    assert condition is not None
+    if _is_truthy(condition):
+        assert if_expression.consequence is not None
+        return evaluate(if_expression.consequence)
+    elif if_expression.alternative is not None:
+        return evaluate(if_expression.alternative)
+    else:
+        return NULL
 
 
 def _evaluate_infix_expression(operator: str, 
@@ -139,6 +161,17 @@ def _evaluate_prefix_expression(operator: str, right: Object) -> Object:
         return _evaluate_minus_operator_expression(right)
     else:
         return NULL
+
+
+def _is_truthy(obj: Object) -> bool:
+    if obj is NULL:
+        return False
+    elif obj is TRUE:
+        return True
+    elif obj is FALSE:
+        return False
+    else:
+        return True
 
 
 def _to_boolean_object(value: bool) -> Boolean:
