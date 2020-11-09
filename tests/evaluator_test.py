@@ -199,6 +199,40 @@ class EvaluatorTest(TestCase):
         self.assertEquals(str(evaluated.parameters[0]), 'x')
         self.assertEquals(str(evaluated.body), '(x + 2)')
 
+    def test_function_calls(self) -> None:
+        tests: List[Tuple[str, int]] = [
+            ('variable identidad = procedimiento(x) { x }; identidad(5);', 5),
+            ('''
+                variable identidad = procedimiento(x) { 
+                    regresa x; 
+                }; 
+                identidad(5);
+            ''', 5),
+            ('''
+                variable doble = procedimiento(x) {
+                    regresa 2 * x;
+                };
+                doble(5);
+            ''', 10),
+            ('''
+                variable suma = procedimiento(x, y) {
+                    regresa x + y;
+                };
+                suma(3, 8);
+            ''', 11),
+            ('''
+                variable suma = procedimiento(x, y) {
+                    regresa x + y;
+                };
+                suma(5 + 5, suma(10, 10));
+            ''', 30),
+            ('procedimiento(x) { x }(5)', 5),
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+            self._test_integer_object(evaluated, expected)
+
     def _evaluate_tests(self, source: str) -> Object:
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
