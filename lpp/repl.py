@@ -20,8 +20,11 @@ def _print_parse_errors(errors: List[str]):
 
 
 def start_repl() -> None:
+    scanned: List[str] = []
+
     while (source := input('>> ')) != 'salir()':
-        lexer: Lexer = Lexer(source)
+        scanned.append(source)
+        lexer: Lexer = Lexer(''.join(scanned))
         parser: Parser = Parser(lexer)
         program: Program = parser.parse_program()
         env: Environment = Environment()
