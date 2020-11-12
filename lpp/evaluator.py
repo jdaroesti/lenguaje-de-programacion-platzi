@@ -17,6 +17,7 @@ from lpp.object import (
     Object,
     ObjectType,
     Return,
+    String,
 )
 
 
@@ -116,6 +117,10 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
         assert function is not None
         return _apply_function(function, args)
+    elif node_type == ast.StringLiteral:
+        node = cast(ast.StringLiteral, node)
+
+        return String(node.value)
 
     return None
 
