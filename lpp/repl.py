@@ -24,7 +24,7 @@ def start_repl() -> None:
 
     while (source := input('>> ')) != 'salir()':
         scanned.append(source)
-        lexer: Lexer = Lexer(''.join(scanned))
+        lexer: Lexer = Lexer(' '.join(scanned))
         parser: Parser = Parser(lexer)
         program: Program = parser.parse_program()
         env: Environment = Environment()

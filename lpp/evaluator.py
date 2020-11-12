@@ -17,6 +17,7 @@ from lpp.object import (
     Object,
     ObjectType,
     Return,
+    String,
 )
 
 
@@ -116,6 +117,10 @@ def evaluate(node: ast.ASTNode, env: Environment) -> Optional[Object]:
 
         assert function is not None
         return _apply_function(function, args)
+    elif node_type == ast.StringLiteral:
+        node = cast(ast.StringLiteral, node)
+
+        return String(node.value)
 
     return None
 
@@ -226,6 +231,9 @@ def _evaluate_infix_expression(operator: str,
     if left.type() == ObjectType.INTEGER \
             and right.type() == ObjectType.INTEGER:
         return _evaluate_integer_infix_expression(operator, left, right)
+    elif left.type() == ObjectType.STRING \
+            and right.type() == ObjectType.STRING:
+        return _evaluate_string_infix_expression(operator, left, right)
     elif operator == '==':
         return _to_boolean_object(left is right)
     elif operator == '!=':
@@ -285,6 +293,23 @@ def _evaluate_prefix_expression(operator: str, right: Object) -> Object:
     else:
         return _new_error(_UNKNOWN_PREFIX_OPERATOR, [operator, right.type().name])
 
+
+def _evaluate_string_infix_expression(operator: str,
+                                      left: Object,
+                                      right: Object) -> Object:
+    left_value: str = cast(String, left).value
+    right_value: str = cast(String, right).value
+
+    if operator == '+':
+        return String(left_value + right_value)
+    elif operator == '==':
+        return _to_boolean_object(left_value == right_value)
+    elif operator == '!=':
+        return _to_boolean_object(left_value != right_value)
+    else:
+        return _new_error(_UNKNOWN_INFIX_OPERATOR, [left.type().name,
+                                                    operator,
+                                                    right.type().name])
 
 def _is_truthy(obj: Object) -> bool:
     if obj is NULL:

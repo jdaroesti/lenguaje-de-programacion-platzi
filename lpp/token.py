@@ -37,6 +37,7 @@ class TokenType(Enum):
     RPAREN = auto()
     RBRACE = auto()
     SEMICOLON = auto()
+    STRING = auto()
     TRUE = auto()
 
 
