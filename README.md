@@ -32,3 +32,33 @@ mypy . && nosetests
 ```bash
 python3.8 main.py
 ```
+
+# A sneak peak of the language
+```
+>> variable a = 5;
+>> variable b = 10;
+>> a + b;
+15
+>> variable mayor_de_edad = procedimiento(edad) { 
+        si(edad > 18) { 
+            regresa verdadero;
+        si_no {
+            regresa falso;
+        }
+    };
+>> mayor_de_edad(20);
+verdadero
+>> mayor_de_edad(15);
+falso
+>> variable sumador = procedimiento(x) {
+       regresa procedimiento(y) {
+           regresa x + y;
+       };
+   }
+>> variable suma_dos = sumador(2);
+>> suma_dos(5);
+7
+>> variable suma_cinco = sumador(5);
+>> suma_cinco(20);
+25
+```
