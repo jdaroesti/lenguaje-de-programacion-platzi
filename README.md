@@ -44,7 +44,7 @@ Escribe un oración para comenzar.
 >> variable mayor_de_edad = procedimiento(edad) { 
         si(edad > 18) { 
             regresa verdadero;
-        si_no {
+        } si_no {
             regresa falso;
         }
     };
