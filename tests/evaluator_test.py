@@ -4,6 +4,7 @@ from typing import (
     List,
     Tuple,
     Optional,
+    Union,
 )
 from unittest import TestCase
 
@@ -172,10 +173,7 @@ class EvaluatorTest(TestCase):
         for source, expected in tests:
             evaluated = self._evaluate_tests(source)
 
-            self.assertIsInstance(evaluated, Error)
-
-            evaluated = cast(Error, evaluated)
-            self.assertEquals(evaluated.message, expected)
+            self._test_error_object(evaluated, expected)
 
     def test_assignment_statements(self) -> None:
         tests: List[Tuple[str, int]] = [
@@ -276,6 +274,27 @@ class EvaluatorTest(TestCase):
             evaluated = self._evaluate_tests(source)
             self._test_boolean_object(evaluated, expected)
 
+    def test_builtin_functions(self) -> None:
+        tests: List[Tuple[str, Union[str, int]]] = [
+            ('longitud("");', 0),
+            ('longitud("cuatro");', 6),
+            ('longitud("Hola mundo");', 10),
+            ('longitud(1);', 
+             'argumento para longitud sin soporte, se recibió INTEGER'),
+            ('longitud("uno", "dos");',
+             'número incorrecto de argumentos para longitud, se recibieron 2, se requieren 1'),
+        ]
+
+        for source, expected in tests:
+            evaluated = self._evaluate_tests(source)
+
+            if type(expected) == int:
+                expected = cast(int, expected)
+                self._test_integer_object(evaluated, expected)
+            else:
+                expected = cast(str, expected)
+                self._test_error_object(evaluated, expected)
+
     def _evaluate_tests(self, source: str) -> Object:
         lexer: Lexer = Lexer(source)
         parser: Parser = Parser(lexer)
@@ -292,6 +311,12 @@ class EvaluatorTest(TestCase):
 
         evaluated = cast(Boolean, evaluated)
         self.assertEquals(evaluated.value, expected)
+
+    def _test_error_object(self, evaluated: Object, expected: str) -> None:
+            self.assertIsInstance(evaluated, Error)
+
+            evaluated = cast(Error, evaluated)
+            self.assertEquals(evaluated.message, expected)
 
     def _test_integer_object(self, evaluated: Object, expected: int) -> None:
         self.assertIsInstance(evaluated, Integer)
