@@ -35,6 +35,8 @@ python3.8 main.py
 
 # A sneak peak of the language
 ```
+Bienvenido al Lenguaje de Programación Platzi.
+Escribe un oración para comenzar.
 >> variable a = 5;
 >> variable b = 10;
 >> a + b;
