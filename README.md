@@ -63,4 +63,6 @@ falso
 >> variable suma_cinco = sumador(5);
 >> suma_cinco(20);
 25
+>> mayor_de_edad(suma_cinco(20));
+verdadero
 ```
