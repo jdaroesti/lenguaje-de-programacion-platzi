@@ -1,4 +1,4 @@
-# curso-interpretes-platzi
+# Lenguaje de programación Platzi
 
 Source code for the Interpreters course at Platzi.
 
@@ -54,7 +54,7 @@ falso
        regresa procedimiento(y) {
            regresa x + y;
        };
-   }
+   };
 >> variable suma_dos = sumador(2);
 >> suma_dos(5);
 7
